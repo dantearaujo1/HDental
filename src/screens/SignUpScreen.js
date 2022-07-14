@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import firebaseApp, {firestore as db}  from '../../config/firebase'
 import { TouchableOpacity, StyleSheet, Text, View, TextInput, Image, } from 'react-native';
 import { query, getDocs, collection, where, addDoc } from "firebase/firestore"
+import PhoneInput from 'react-native-phone-input'
+
 import { getUserLibraryPermission} from "../utils/Permissions"
 import {uploadImage} from "../utils/Utils"
 
@@ -13,6 +15,7 @@ export default function SignUpScreen({navigation}) {
   const [password, setPassword] = useState('');
   const [userName, setUserName] = useState('');
   const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
   const [cro, setCRO] = useState('');
   const [profileImage, setProfileImage] = useState(null);
 
@@ -38,15 +41,19 @@ export default function SignUpScreen({navigation}) {
             email: user.email,
             CRO: cro,
             address: address,
-            profileImageUrl: profileImage
+            profileImageURL: profileImage,
+            phoneNumber: phone
           });
         }
-        navigation.navigate('Home');
+        navigation.navigate('Home',{userID: res.user.uid});
       }
     } catch (error){
       alert(error.message);
     }
   };
+  const handlePhoneNumber = (number) => {
+    setPhone(number);
+  }
 
   return (
     <View style={styles.container}>
@@ -88,6 +95,7 @@ export default function SignUpScreen({navigation}) {
         value={address}
         onChangeText={text=>setAddress(text)}
       ></TextInput>
+      <PhoneInput initialCountry='Brazil' onChangePhoneNumber={handlePhoneNumber} offset={30} textProps={{ placeholder:'Phone Number' }} style={styles.textInput}/>
 
 
       <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
