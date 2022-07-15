@@ -69,8 +69,8 @@ const styles = StyleSheet.create(
       marginTop: 50,
     },
     clinicImage:{
-      width:"20%",
-      height:"20%",
+      width:"60%",
+      height:"30%",
       marginTop: 30,
     },
   }

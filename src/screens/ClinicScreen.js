@@ -19,9 +19,10 @@ export default function ClinicScreen({navigation,route}){
       getClinicData();
     }
   },[update]);
+
   useEffect(() => {
     setUpdate(true);
-  },[navigation]);
+  },[route]);
 
   const getClinicData = () => {
     const q = query(collection(firestore,"clinics"), where("creator","==",firebaseApp.auth().currentUser.uid));

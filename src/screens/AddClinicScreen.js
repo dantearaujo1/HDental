@@ -92,7 +92,7 @@ export default function AddClinicScreen({navigation}) {
             });
         await updateDoc(docRef,{id:docRef.id});
         await uploadImage(docRef.id,'clinicAvatars','clinics');
-        navigation.navigate('Clinics');
+        navigation.navigate('Clinics', {update: true});
       }
     }
     catch (error){
