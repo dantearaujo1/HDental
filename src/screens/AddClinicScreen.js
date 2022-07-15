@@ -92,7 +92,7 @@ export default function AddClinicScreen({navigation}) {
             });
         await updateDoc(docRef,{id:docRef.id});
         await uploadImage(docRef.id,'clinicAvatars','clinics');
-        navigation.navigate('Home');
+        navigation.navigate('Clinics');
       }
     }
     catch (error){
@@ -117,7 +117,6 @@ export default function AddClinicScreen({navigation}) {
       <TextInput
         placeholder='Owner'
         secureTextEntry={false}
-        autoCapitalize='none'
         style={styles.textInput}
         value={owner}
         onChangeText={text=>setOwner(text)}
