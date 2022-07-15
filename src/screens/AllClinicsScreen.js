@@ -24,7 +24,7 @@ export default function ClinicScreen({navigation,route}){
   },[navigation]);
 
   const getClinicData = () => {
-    const q = query(collection(firestore,"clinics"), where("creator","==",firebaseApp.auth().currentUser.uid));
+    const q = query(collection(firestore,"clinics"));
     getDocs(q).then((docs) => {
       docs.forEach((doc)=> { {
         Data.push(doc.data());
@@ -33,29 +33,26 @@ export default function ClinicScreen({navigation,route}){
       });
   }
 
+
+
   return(
     <View style={styles.container}>
       <FlatList
         style={styles.container}
         data={Data}
+        extraData={Data}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
           <View style={styles.clinicsButtonsContainer}>
             <TouchableOpacity
               onPress={()=> { navigation.navigate('ClinicDetail',{clinicID:item.id}) }}
               style={styles.clinicsButtons}>
-              <Image
-                style={styles.clinicImage}
-                source={item.profileImageURL?{uri:item.profileImageURL}:require('../../assets/user_image.png')}></Image>
+              <Image style={styles.clinicImage} source={item.profileImageURL?{uri:item.profileImageURL}:require('../../assets/user_image.png')}></Image>
               <Text style={styles.clinicsButtonsText}>{item.name}</Text>
             </TouchableOpacity>
           </View>
         )}>
       </FlatList>
-      <View style={styles.bottomButtonsContainer}>
-          <TouchableOpacity  onPress={()=> { navigation.navigate('AddClinic'); }}><Text style={styles.bottomButtons}>Add</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.bottomButtons}>Delete</Text></TouchableOpacity>
-      </View>
     </View>
   )
 }
@@ -87,7 +84,7 @@ const styles = StyleSheet.create(
       backgroundColor: '#400036',
     },
     clinicImage:{
-      position:'relative',
+      position:'absolute',
       left:15,
       width:80,
       height:80,

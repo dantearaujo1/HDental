@@ -34,11 +34,14 @@ export default function HomeScreen({navigation,route}) {
   useEffect(()=> {
       getUserData();
   }, [name,CRO]);
+
   useEffect(()=> {
     if(profileImage){
       uploadImage();
     }
   }, [profileImage]);
+
+
 
   const onSignOut = () => {
     navigation.goBack();
@@ -51,7 +54,7 @@ export default function HomeScreen({navigation,route}) {
       alert("Permission to access camera roll is required!");
       return;
     }
-    pickImage();
+    pickImage()
   }
   const pickImage = async() => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -66,24 +69,25 @@ export default function HomeScreen({navigation,route}) {
     }
   }
 
-  const getUserData = async () => {
+  const getUserData = () => {
     try{
 
       const q = query(collection(firestore,"users"), where ("uid", "==",route.params.userID));
-      const docs = await getDocs(q);
-      const data = docs.docs[0].data();
+      getDocs(q).then((docs)=> { 
+        const data = docs.docs[0].data();
+        setName(data.name);
+        setCRO(data.CRO);
+        setProfileImage(data.profileImageURL);
 
-      setName(data.name);
-      setCRO(data.CRO);
-      const imageRef = ref(storage, 'avatars/'+data.uid);
-      downloadUserProfileImage(imageRef);
+      })
+
     } catch (error){
       alert(error.message);
     }
   }
 
   const downloadUserProfileImage = async (imageRef) => {
-    getDownloadURL(imageRef).then((url)=> {
+    await getDownloadURL(imageRef).then((url)=> {
       setProfileImage(url);
     })
   }
@@ -108,8 +112,8 @@ export default function HomeScreen({navigation,route}) {
     const storageRef = ref(storage, 'avatars/'+route.params.userID);
 
     // Upload blob to Storage
-    uploadBytes(storageRef,blob).then((uploadResult) => { 
-      getDownloadURL(uploadResult.ref).then(async (url)=> {
+    await uploadBytes(storageRef,blob).then(async (uploadResult) => {
+      await getDownloadURL(uploadResult.ref).then(async (url)=> {
         const userRef = collection(firestore,'users');
         const q = query(userRef,where("uid", "==", storageRef.name));
         const docID = await getDocs(q).then((snapshot)=> {
@@ -124,20 +128,18 @@ export default function HomeScreen({navigation,route}) {
   return (
     <View style={styles.container}>
 
-      <TouchableOpacity onPress={getUserPermission}><Image source={profileImage?{uri:profileImage}:require('../../assets/user_image.png')} style={styles.logoImage}></Image></TouchableOpacity>
+      <TouchableOpacity onPress={() => {
+        {getUserPermission();}
+      }}><Image source={profileImage?{uri:profileImage}:require('../../assets/user_image.png')} style={styles.logoImage}></Image></TouchableOpacity>
 
       <Text style={styles.title}>{name}</Text>
       <Text style={styles.cro}>CRO: {CRO} </Text>
       <TouchableOpacity onPress={() => {
-        navigation.navigate("Clinics");
+        { navigation.navigate('Clinics'); }
+      }} style={styles.buttons}><Text style={styles.buttonsText}>Meus Consultórios</Text></TouchableOpacity>
+      <TouchableOpacity onPress={() => {
+        { navigation.navigate('AllClinics'); }
       }} style={styles.buttons}><Text style={styles.buttonsText}>Consultórios</Text></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons}><Text style={styles.buttonsText} >Procedimentos</Text></TouchableOpacity>
-      <TouchableOpacity  style={styles.buttons}><Text style={styles.buttonsText}>Pacientes</Text></TouchableOpacity>
-      <TouchableOpacity style={styles.buttons} onPress={
-        ()=> {
-          navigation.navigate('Login');
-        }
-      }><Text style={styles.buttonsText}>Relatório</Text></TouchableOpacity>
       <TouchableOpacity style={styles.buttons} onPress={onSignOut}><Text style={styles.buttonsText}>Log Out</Text></TouchableOpacity>
 
 

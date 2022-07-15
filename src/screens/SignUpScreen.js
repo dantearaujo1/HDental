@@ -1,13 +1,11 @@
-import React, {useState, useEffect} from 'react';
-import firebaseApp, {firestore as db}  from '../../config/firebase'
+import React, {useState} from 'react';
+import {firestore , storage}  from '../../config/firebase'
 import { TouchableOpacity, StyleSheet, Text, View, TextInput, Image, } from 'react-native';
-import { query, getDocs, collection, where, addDoc } from "firebase/firestore"
+import { query, getDocs, updateDoc, collection, where, addDoc } from "firebase/firestore"
+import { getDownloadURL, ref, uploadBytes} from "firebase/storage"
 import PhoneInput from 'react-native-phone-input'
+import * as ImagePicker from 'expo-image-picker'
 
-import { getUserLibraryPermission} from "../utils/Permissions"
-import {uploadImage} from "../utils/Utils"
-
-const auth = firebaseApp.auth();
 
 export default function SignUpScreen({navigation}) {
   const [email, setEmail] = useState('');
@@ -19,11 +17,58 @@ export default function SignUpScreen({navigation}) {
   const [cro, setCRO] = useState('');
   const [profileImage, setProfileImage] = useState(null);
 
-  useEffect( () => {
-    if(profileImage){
-      uploadImage(userID);
+  const uploadImage = async (id) => {
+
+    // Implement a new Blob promise with XMLHTTPRequest
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", profileImage, true);
+      xhr.send(null);
+    });
+
+    // Create a ref in Firebase
+    const storageRef = ref(storage, 'avatars/'+id);
+
+    // Upload blob to Storage
+    uploadBytes(storageRef,blob).then((uploadResult) => {
+      getDownloadURL(uploadResult.ref).then(async (url)=> {
+        const userRef = collection(firestore,'users');
+        const q = query(userRef,where("uid", "==", storageRef.name));
+        const docID = await getDocs(q).then((snapshot)=> {
+          snapshot.forEach((child)=> {
+            updateDoc(child.ref,{profileImageURL:url});
+          })
+        })
+      })
+    });
+  }
+  const getUserPermission = async() => {
+    let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false){
+      alert("Permission to access camera roll is required!");
+      return;
     }
-  }, [profileImage]);
+    pickImage();
+  }
+  const pickImage = async() => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4,3],
+      quality: 1,
+    });
+
+    if(!result.cancelled){
+      setProfileImage(result.uri);
+    }
+  }
 
   const createUser = async () => {
     try {
@@ -31,21 +76,24 @@ export default function SignUpScreen({navigation}) {
         const res = await auth.createUserWithEmailAndPassword(email,password);
         const user = res.user;
         setUserId(user.uid);
-        const q = query(collection(db,"users"), where("uid","==",user.uid));
-        const docs = await getDocs(q);
-        if(docs.docs.length === 0){
-          await addDoc(collection(db,"users"),{
-            uid: user.uid,
-            name: userName,
-            authProvider: "local",
-            email: user.email,
-            CRO: cro,
-            address: address,
-            profileImageURL: profileImage,
-            phoneNumber: phone
+        const q = query(collection(firestore,"users"), where("uid","==",user.uid));
+        getDocs(q).then((docs)=> { 
+          if(docs.docs.length === 0){
+            addDoc(collection(firestore,"users"),{
+              uid: user.uid,
+              name: userName,
+              authProvider: "local",
+              email: user.email,
+              CRO: cro,
+              address: address,
+              profileImageURL: profileImage,
+              phoneNumber: phone
+            });
+          }
+          uploadImage(user.uid).then(()=> {
+            navigation.navigate('Home',{userID: user.uid});
           });
-        }
-        navigation.navigate('Home',{userID: res.user.uid});
+        });
       }
     } catch (error){
       alert(error.message);
@@ -60,9 +108,7 @@ export default function SignUpScreen({navigation}) {
 
       <Text style={styles.title}>Sign Up</Text>
 
-      <TouchableOpacity onPress={() => {
-        getUserLibraryPermission(setProfileImage);
-      }}><Image source={profileImage?{uri:profileImage}:require('../../assets/user_image.png')} style={styles.logoImage}></Image></TouchableOpacity>
+      <TouchableOpacity onPress={getUserPermission}><Image source={profileImage?{uri:profileImage}:require('../../assets/user_image.png')} style={styles.logoImage}></Image></TouchableOpacity>
       <TextInput
         placeholder='Email'
         style={styles.textInput}
@@ -103,7 +149,7 @@ export default function SignUpScreen({navigation}) {
           <Text style={{textAlign:'center'}}>Ok</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.loginButtons}>
-          <Text style={{textAlign:'center'}}>Back</Text>
+          <Text style={{textAlign:'center'}} onPress={()=> { navigation.navigate('Login'); }}>Back</Text>
         </TouchableOpacity>
       </View>
     </View>
