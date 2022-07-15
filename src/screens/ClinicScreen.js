@@ -25,10 +25,12 @@ export default function ClinicScreen({navigation,route}){
   },[route]);
 
   const getClinicData = () => {
+    Data.length = 0;
     const q = query(collection(firestore,"clinics"), where("creator","==",firebaseApp.auth().currentUser.uid));
     getDocs(q).then((docs) => {
       docs.forEach((doc)=> { {
-        Data.push(doc.data());
+
+          Data.push(doc.data());
       } });
       setUpdate(false);
       });
