@@ -34,8 +34,16 @@ e o nome do consultório.
 Um para a tela de Todos os Consultórios em uma FlatList criados pelos usuários. Nessa tela apenas podemos ver as informações e podemos entrar na tela
 de detalhes de cada consultório ja criado por você e outros usuário.
 
-Na tela de criar seu consultório, vc pode cadastrar 4 informações que são armazenadas no firestore em outra coleção chamada clinics
-e então 
+Na tela de criar seu consultório, vc pode cadastrar 4 informações (sem contar com o uid aleatório gerado pelo firestore) que são armazenadas no firestore em outra coleção chamada clinics
+e essas informações são utilizadas nas Telas de Meus consultório, Consultório e DetalhesConsultórios.
+
+Na tela de Detalhes do Consultório, o avatar do consultório vai aparecer assim como seu nome, seu dono e seu Endereço.
+
+Professor, não vi no trabalho que era pra apresentar. Quando somei os pontos das funcionalidades deu 10 ai eu nem me preocupei.
+Só me preocupei em entregar mesmo, apesar de não ter entregado completo, irei implementar ainda. Tive extrema dificuldade utilizando react-native e javascript.
+Perdi muito tempo para identificar bugs, pois o log era muito chato de ler, o log do expo.
+
+Vou mandar o apk do aplicativo para o senhor.
 
 # Não Implementado 
 
