@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
-import {firestore , storage}  from '../../config/firebase'
+import firebaseApp, {firestore , storage}  from '../../config/firebase'
 import { TouchableOpacity, StyleSheet, Text, View, TextInput, Image, } from 'react-native';
 import { query, getDocs, updateDoc, collection, where, addDoc } from "firebase/firestore"
 import { getDownloadURL, ref, uploadBytes} from "firebase/storage"
 import PhoneInput from 'react-native-phone-input'
 import * as ImagePicker from 'expo-image-picker'
 
+const auth = firebaseApp.auth();
 
 export default function SignUpScreen({navigation}) {
   const [email, setEmail] = useState('');
