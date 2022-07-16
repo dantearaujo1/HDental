@@ -4,7 +4,7 @@ Professor, adianto logo que não consegui realizar todas as etapas do projeto.
 A ideia do meu aplicativo inicialmente era uma, mas acabei não conseguindo implementar
 a tempo para entrega.
 
-O meu aplicativo foi feito utilizando React Native utilizando a ferramente de desenolvimento Expo.
+O meu aplicativo foi feito utilizando React Native utilizando a ferramenta de desenolvimento Expo.
 Gerei um apk para caso o senhor queira instalar no seu dispositivo e testar.
 
 Meu aplicativo tem um total de 7 telas:
