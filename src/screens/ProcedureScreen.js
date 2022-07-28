@@ -1,40 +1,14 @@
 import React, {useState, useEffect} from 'react';
 import { TouchableOpacity,
-  StyleSheet, ActivityIndicator,
+  StyleSheet,
   Text, FlatList, Image,
   View,
 } from 'react-native';
 
-import firebaseApp, {firestore , storage}  from '../../config/firebase'
-import { query, getDocs, updateDoc, collection, where, addDoc } from "firebase/firestore"
-import { getDownloadURL, ref, uploadBytes} from "firebase/storage"
-import * as ImagePicker from 'expo-image-picker'
 
-export default function ClinicScreen({navigation,route}){
+export default function ProcedureScreen({navigation,route}){
   const [Data,setData] = useState([]);
   const [update,setUpdate] = useState(true);
-
-  useEffect(() => {
-    if(update){
-      getClinicData();
-    }
-  },[update]);
-
-  useEffect(() => {
-    setUpdate(true);
-  },[route]);
-
-  const getClinicData = () => {
-    Data.length = 0;
-    const q = query(collection(firestore,"clinics"), where("creator","==",firebaseApp.auth().currentUser.uid));
-    getDocs(q).then((docs) => {
-      docs.forEach((doc)=> { {
-
-          Data.push(doc.data());
-      } });
-      setUpdate(false);
-      });
-  }
 
   return(
     <View style={styles.container}>
@@ -45,7 +19,7 @@ export default function ClinicScreen({navigation,route}){
         renderItem={({item}) => (
           <View style={styles.clinicsButtonsContainer}>
             <TouchableOpacity
-              onPress={()=> { navigation.navigate('ClinicDetail',{clinicID:item.id}) }}
+              onPress={()=> {}}
               style={styles.clinicsButtons}>
               <Image
                 style={styles.clinicImage}
@@ -57,10 +31,6 @@ export default function ClinicScreen({navigation,route}){
           </View>
         )}>
       </FlatList>
-      <View style={styles.bottomButtonsContainer}>
-          <TouchableOpacity  onPress={()=> { navigation.navigate('AddClinic'); }}><Text style={styles.bottomButtons}>Add</Text></TouchableOpacity>
-          <TouchableOpacity><Text style={styles.bottomButtons}>Delete</Text></TouchableOpacity>
-      </View>
     </View>
   )
 }

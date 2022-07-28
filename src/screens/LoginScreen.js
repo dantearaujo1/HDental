@@ -25,7 +25,9 @@ export default function LoginScreen({route, navigation }) {
   return (
     <View style={styles.container}>
 
-      <Image source={require('../../assets/odontology-logo.png')} style={styles.logoImage}></Image>
+      <View style={styles.imageContainer}>
+        <Image source={require('../../assets/odontology-logo.png')} style={styles.logoImage}></Image>
+      </View>
       <Text style={styles.title}>HDental</Text>
 
       <TextInput
@@ -67,10 +69,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoImage: {
-    height: '28%',
-    width: '40%',
+  imageContainer:{
     marginBottom: 25,
+  },
+  logoImage: {
+    height: 300,
+    width: 200,
   },
   title: {
     color: '#AACC11',

@@ -47,7 +47,10 @@ export default function ClinicScreen({navigation,route}){
             <TouchableOpacity
               onPress={()=> { navigation.navigate('ClinicDetail',{clinicID:item.id}) }}
               style={styles.clinicsButtons}>
-              <Image style={styles.clinicImage} source={item.profileImageURL?{uri:item.profileImageURL}:require('../../assets/user_image.png')}></Image>
+              <Image
+                style={styles.clinicImage}
+                source={item.profileImageURL?{uri:item.profileImageURL}:require('../../assets/user_image.png')}>
+              </Image>
               <Text style={styles.clinicsButtonsText}>{item.name}</Text>
             </TouchableOpacity>
           </View>
@@ -61,15 +64,12 @@ const styles = StyleSheet.create(
   {
     container: {
       flex: 1,
-      backgroundColor: '#5C0726',
-      // alignItems: 'center',
-      // justifyContent: 'center',
-    },
-    flatListContainer:{
+      backgroundColor: '#000000',
     },
     clinicsButtonsContainer:{
       backgroundColor: '#000',
       width:"100%",
+      height:100,
     },
     clinicsButtons:{
       flex:1,
@@ -94,18 +94,6 @@ const styles = StyleSheet.create(
       left: 105,
       textAlign:'left',
       color:'#FFF',
-    },
-    bottomButtonsContainer:{
-      flexDirection:'row',
-      justifyContent:'space-around',
-      alignItems:'center',
-      height: "8%",
-      width: "100%",
-      backgroundColor: '#898C8B'
-    },
-    bottomButtons:{
-      paddingHorizontal: "25%",
-      paddingVertical: "5%",
     },
   }
 )

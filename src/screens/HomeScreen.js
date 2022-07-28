@@ -1,12 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import app, {firestore,storage}   from '../../config/firebase';
-import {
-    getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytes
-} from "firebase/storage"
+import { query, getDocs, updateDoc, collection, where, } from "firebase/firestore"
 import {
   TouchableOpacity,
   StyleSheet,
@@ -14,122 +9,41 @@ import {
   View,
   Image
 } from 'react-native';
-import {
-  query,
-  getDocs,
-  doc,
-  updateDoc,
-  collection,
-  where,
-} from "firebase/firestore"
-import * as ImagePicker from 'expo-image-picker'
+import {getUserData,uploadImage,getCameraPermission,getMediaLibraryPermission} from '../utils/Utils'
 
 export default function HomeScreen({navigation,route}) {
   const [name, setName] = useState('')
   const [CRO, setCRO] = useState('')
+  const [shouldUploadImage, setShouldUploadImage] = useState(false)
   const [profileImage, setProfileImage] = useState(null);
 
   const auth = app.auth();
 
   useEffect(()=> {
-      getUserData();
+    getUserData('users',"uid","==",route.params.userID).then((data)=> {
+      setName(data.name);
+      setCRO(data.CRO);
+      setProfileImage(data.profileImageURL);
+    })
   }, [name,CRO]);
 
   useEffect(()=> {
-    if(profileImage){
-      uploadImage();
+    if(shouldUploadImage){
+      uploadImage(profileImage,'avatars/'+route.params.userID,'users','uid');
+      setShouldUploadImage(false);
     }
-  }, [profileImage]);
-
-
+  });
 
   const onSignOut = () => {
     navigation.goBack();
     auth.signOut();
   }
 
-  const getUserPermission = async() => {
-    let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false){
-      alert("Permission to access camera roll is required!");
-      return;
-    }
-    pickImage()
-  }
-  const pickImage = async() => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4,3],
-      quality: 1,
-    });
-
-    if(!result.cancelled){
-      setProfileImage(result.uri);
-    }
-  }
-
-  const getUserData = () => {
-    try{
-
-      const q = query(collection(firestore,"users"), where ("uid", "==",route.params.userID));
-      getDocs(q).then((docs)=> { 
-        const data = docs.docs[0].data();
-        setName(data.name);
-        setCRO(data.CRO);
-        setProfileImage(data.profileImageURL);
-
-      })
-
-    } catch (error){
-      alert(error.message);
-    }
-  }
-
-  const downloadUserProfileImage = async (imageRef) => {
-    await getDownloadURL(imageRef).then((url)=> {
-      setProfileImage(url);
-    })
-  }
-
-  const uploadImage = async () => {
-
-    // Implement a new Blob promise with XMLHTTPRequest
-    const blob = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function () {
-        reject(new TypeError("Network request failed"));
-      };
-      xhr.responseType = "blob";
-      xhr.open("GET", profileImage, true);
-      xhr.send(null);
-    });
-
-    // Create a ref in Firebase
-    const storageRef = ref(storage, 'avatars/'+route.params.userID);
-
-    // Upload blob to Storage
-    await uploadBytes(storageRef,blob).then(async (uploadResult) => {
-      await getDownloadURL(uploadResult.ref).then(async (url)=> {
-        const userRef = collection(firestore,'users');
-        const q = query(userRef,where("uid", "==", storageRef.name));
-        const docID = await getDocs(q).then((snapshot)=> {
-          snapshot.forEach((child)=> {
-            updateDoc(child.ref,{profileImageURL:url});
-          })
-        })
-      })
-    });
-  }
-
   return (
     <View style={styles.container}>
 
       <TouchableOpacity onPress={() => {
-        {getUserPermission();}
+        {getCameraPermission(setProfileImage,setShouldUploadImage);}
       }}><Image source={profileImage?{uri:profileImage}:require('../../assets/user_image.png')} style={styles.logoImage}></Image></TouchableOpacity>
 
       <Text style={styles.title}>{name}</Text>
@@ -140,6 +54,9 @@ export default function HomeScreen({navigation,route}) {
       <TouchableOpacity onPress={() => {
         { navigation.navigate('AllClinics'); }
       }} style={styles.buttons}><Text style={styles.buttonsText}>Consultórios</Text></TouchableOpacity>
+      <TouchableOpacity onPress={() => {
+        { navigation.navigate('Procedures'); }
+      }} style={styles.buttons}><Text style={styles.buttonsText}>Procedimentos</Text></TouchableOpacity>
       <TouchableOpacity style={styles.buttons} onPress={onSignOut}><Text style={styles.buttonsText}>Log Out</Text></TouchableOpacity>
 
 
